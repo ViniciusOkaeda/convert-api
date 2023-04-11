@@ -1,21 +1,32 @@
-import express from "express";
-import cors from "cors";
-import bodyParser from "body-parser";
-import crypto from "crypto";
-import axios from "axios";
-
+const express = require('express');
+const cors = require('cors');
 const app = express();
-app.use(cors());
+const CryptoJS = require("crypto-js");
+const bodyParser = require('body-parser');
+const axios = require('axios');
+const sha1 = require('sha1');
+
+
+app.use(cors({
+    origin: '*'
+}));
 var jsonParser = bodyParser.json()
+
+app.get('/', function (req, res, next) {
+    res.send("Server is running")
+})
 
 app.post("/register", jsonParser, function (req, res) {
     var registerData = req.body;
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
 
     async function registerUserMotv() {
         var timestamp = new Date().getTime();
         const str = timestamp + 'api.lbr' + 'ap2auncv94r5pv0h4ksdgpxjvj5rggm0ahik91b9';
-        const hash = crypto.createHash('sha1').update(str).digest('hex');
-        const authHead = 'api.lbr' + ':' + timestamp + ':' + hash; 
+        const hashSha1 = sha1(str);
+
+        const authHead = 'api.lbr' + ':' + timestamp + ':' + hashSha1; 
     
         const api = axios.create({
             baseURL: "https://sms.yplay.com.br/",
@@ -66,4 +77,5 @@ app.post("/register", jsonParser, function (req, res) {
     }
     registerUserMotv();
 })
+
 app.listen(5000, () => console.log("Server is running"))
